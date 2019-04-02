@@ -4,6 +4,7 @@ from keras import models
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 
+#//
 
 def plt_modle(model_hist):
     acc = model_hist.history['acc']
