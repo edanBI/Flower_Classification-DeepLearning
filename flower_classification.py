@@ -3,6 +3,7 @@ from keras import layers
 from keras import models
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
+import numpy as np
 from tkinter import *
 
 
@@ -58,6 +59,9 @@ model = models.Sequential()
 #
 
 # last layer should be with softmax activation function - do not change!!!
+model.add(layers.Flatten())
+model.add(layers.Dense(classes,activation='relu'))
+model.add(layers.Dense(classes,activation='relu'))
 model.add(layers.Dense(classes, activation='softmax'))
 
 # fill optimizer argument using one of keras.optimizers.
@@ -76,11 +80,11 @@ plt_modle(model_hist)
 
 
 
-def NetworkLoad(Loaded_model):
-    print("testfuncrint1")
-
-def Predict(Pic_Path):
-    print("testfuncprint2")
+def NetworkLoad(PathForModel):
+    model = models.load_model(PathForModel)
 
 
+def Predict():
+    predictions =  model.predict_generator
+    print(np.argmax(predictions[0]))
 
