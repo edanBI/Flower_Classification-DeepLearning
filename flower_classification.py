@@ -1,6 +1,8 @@
 import keras
 from keras import layers
 from keras import models
+from keras import optimizers
+from keras import losses
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,17 +44,22 @@ t_steps = 3462/batch_size
 v_steps = 861/batch_size
 classes = 5
 flower_path = "Users/eranedri/Documents/GitHub/Flower_Classification-DeepLearning/flowers"
+catagories = ["daisy","dandelion","rose","sunflower" ,"tulip"]
 train_gen = train.flow_from_directory(flower_path, target_size = (img_size, img_size), batch_size = batch_size, class_mode='categorical', subset='training')
 valid_gen = train.flow_from_directory(flower_path, target_size = (img_size, img_size), batch_size = batch_size, class_mode = 'categorical', subset='validation')
 
 
 model = models.Sequential()
+
+model.add(layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(img_size,img_size,1)))
+model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+model.add(layers.Dropout(0.2))
 model.add(layers.Flatten())
 model.add(layers.Dense(classes,activation='relu'))
-model.add(layers.Dense(classes,activation='relu'))
 model.add(layers.Dense(classes, activation='softmax'))
-optimizer =/*keras.optimizers*/
-loss =/*keras.losses*/
+
+optimizer = optimizers.Adam()
+loss = losses.categorical_crossentropy
 model.compile(loss= loss ,optimizer=optimizer ,metrics=['accuracy'])
 model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs= 8 , validation_data=valid_gen, validation_steps=v_steps)
 model.save('flowers_model.h5')
