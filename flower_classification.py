@@ -6,7 +6,26 @@ from keras import losses
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 import numpy as np
-from tkinter import *
+from tkinter import Tk, Label, Button
+
+
+class ModelGUI:
+    def __init__(self, master):
+        self.master = master
+        master.title("Welcome to the image classification system!")
+
+        self.label = Label(master, text="This is our first GUI!")
+        self.label.pack()
+
+        self.greet_button = Button(master, text="Greet", command=self.greet)
+        self.greet_button.pack()
+
+        self.close_button = Button(master, text="Close", command=master.quit)
+        self.close_button.pack()
+
+    def greet(self):
+        print("Greetings!")
+
 
 
 def plt_modle(model_hist):
@@ -73,4 +92,9 @@ def NetworkLoad(PathForModel):
 def Predict():
     predictions =  model.predict_generator
     print(np.argmax(predictions[0]))
+
+class main():
+    root = Tk()
+    GUI = ModelGUI(root)
+    root.mainloop()
 
