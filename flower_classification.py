@@ -3,8 +3,8 @@ from keras import layers
 from keras import models
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
+from tkinter import *
 
-#//
 
 def plt_modle(model_hist):
     acc = model_hist.history['acc']
@@ -42,7 +42,7 @@ batch_size = 20
 t_steps = 3462/batch_size
 v_steps = 861/batch_size
 classes = 5
-flower_path = /*insert path */
+flower_path = "Users/eranedri/Documents/GitHub/Flower_Classification-DeepLearning/flowers"
 train_gen = train.flow_from_directory(flower_path, target_size = (img_size, img_size), batch_size = batch_size, class_mode='categorical', subset='training')
 valid_gen = train.flow_from_directory(flower_path, target_size = (img_size, img_size), batch_size = batch_size, class_mode = 'categorical', subset='validation')
 
@@ -73,4 +73,14 @@ model.compile(loss= loss ,optimizer=optimizer ,metrics=['accuracy'])
 model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs= 8 , validation_data=valid_gen, validation_steps=v_steps)
 model.save('flowers_model.h5')
 plt_modle(model_hist)
+
+
+
+def NetworkLoad(Loaded_model):
+    print("testfuncrint1")
+
+def Predict(Pic_Path):
+    print("testfuncprint2")
+
+
 
