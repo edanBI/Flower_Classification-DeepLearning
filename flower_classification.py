@@ -42,6 +42,13 @@ class ModelGUI:
         self.save_button = Button(master, text="Save network",width=10,height=2,command=self.Save,bg="blue").grid(row=3,column=2)
         # self.save_button.pack()
 
+        OutPut = PanedWindow().grid(row=4)
+        # OutPut.pack(fill=BOTH,expand=1)
+        # test = Label(OutPut,text="testpane")
+        # OutPut.add(test)
+
+
+
     def Browse(self):
         FileName = filedialog.askdirectory()
         FilePath.set(FileName)
