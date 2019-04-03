@@ -6,25 +6,43 @@ from keras import losses
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 import numpy as np
-from tkinter import Tk, Label, Button
+from tkinter import *
+from PIL import Image
 
 
 class ModelGUI:
     def __init__(self, master):
         self.master = master
-        master.title("Welcome to the image classification system!")
+        master.title("Welcome to the best image classification system!")
 
         self.label = Label(master, text="This is our first GUI!")
         self.label.pack()
 
-        self.greet_button = Button(master, text="Greet", command=self.greet)
+        self.greet_button = Button(master, text="Browse..", command=self.greet)
         self.greet_button.pack()
 
-        self.close_button = Button(master, text="Close", command=master.quit)
+        self.txt = Entry(master, width=10)
+        self.label.grid(1)
+
+        # file = filedialog.askopenfilenames()
+        # dir = filedialog.askdirectory()
+
+        self.close_button = Button(master, text="Predict", command=Predict())
+        self.close_button.pack()
+
+        self.close_button = Button(master, text="New Classifcation", command=self.greet())
         self.close_button.pack()
 
     def greet(self):
         print("Greetings!")
+
+
+
+class main():
+    root = Tk()
+    GUI = ModelGUI(root)
+    root.mainloop()
+
 
 
 
@@ -62,7 +80,7 @@ batch_size = 20
 t_steps = 3462/batch_size
 v_steps = 861/batch_size
 classes = 5
-flower_path = "Users/eranedri/Documents/GitHub/Flower_Classification-DeepLearning/flowers"
+flower_path = "/Users/eranedri/Documents/GitHub/Flower_Classification-DeepLearning/flowers"
 catagories = ["daisy","dandelion","rose","sunflower" ,"tulip"]
 train_gen = train.flow_from_directory(flower_path, target_size = (img_size, img_size), batch_size = batch_size, class_mode='categorical', subset='training')
 valid_gen = train.flow_from_directory(flower_path, target_size = (img_size, img_size), batch_size = batch_size, class_mode = 'categorical', subset='validation')
@@ -70,7 +88,7 @@ valid_gen = train.flow_from_directory(flower_path, target_size = (img_size, img_
 
 model = models.Sequential()
 
-model.add(layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(img_size,img_size,1)))
+model.add(layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(img_size,img_size,3)))
 model.add(layers.MaxPooling2D(pool_size=(2, 2)))
 model.add(layers.Dropout(0.2))
 model.add(layers.Flatten())
@@ -80,7 +98,7 @@ model.add(layers.Dense(classes, activation='softmax'))
 optimizer = optimizers.Adam()
 loss = losses.categorical_crossentropy
 model.compile(loss= loss ,optimizer=optimizer ,metrics=['accuracy'])
-model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs= 8 , validation_data=valid_gen, validation_steps=v_steps)
+model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs= 1 , validation_data=valid_gen, validation_steps=v_steps)
 model.save('flowers_model.h5')
 plt_modle(model_hist)
 
@@ -93,8 +111,5 @@ def Predict():
     predictions =  model.predict_generator
     print(np.argmax(predictions[0]))
 
-class main():
-    root = Tk()
-    GUI = ModelGUI(root)
-    root.mainloop()
+
 
