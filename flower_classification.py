@@ -5,14 +5,13 @@ from keras import optimizers
 from keras import losses
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 import matplotlib
+
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 import tkinter as tk
 from tkinter import filedialog
 
-
-global model
 
 # system interface
 class ModelGUI:
@@ -24,33 +23,43 @@ class ModelGUI:
         master.title("Welcome to the best image classification system!")
         self.Header = tk.Label(master, text="Let's Start!").grid(row=0, column=1)
 
-        self.browse_button = tk.Button(master, text="Browse..", width=10, height=2, command=self.DatasetLoad()).grid(row=1, column=2)
+        self.browse_button = tk.Button(master, text="Browse..", width=10, height=2, command=self.DatasetLoad).grid(
+            row=1, column=2)
         self.directions = tk.Label(master, text="Select Dataset File to open:").grid(row=1, column=0)
         self.DataSetPath = tk.Entry(master).grid(row=1, column=1)
 
-        self.browse_button = tk.Button(master, text="Browse..", width=10, height=2, command=self.ModelLoad()).grid(row=2, column=2)
+        self.browse_button = tk.Button(master, text="Browse..", width=10, height=2, command=self.ModelLoad).grid(row=2,
+                                                                                                                 column=2)
         self.directions = tk.Label(master, text="Select Model to load:").grid(row=2, column=0)
         self.ModelPath = tk.Entry(master).grid(row=2, column=1)
 
-        self.predict_button = tk.Button(master, text="Predict", width=25, height=2, command=self.Predict()).grid(row=3, column=1)
-        self.restart_button = tk.Button(master, text="Restart", width=25, height=2, command=self.Restart()).grid(row=4, column=1)
+        self.predict_button = tk.Button(master, text="Predict", width=25, height=2, command=self.Predict).grid(row=3,
+                                                                                                               column=1)
+        self.restart_button = tk.Button(master, text="Restart", width=25, height=2, command=self.Restart).grid(row=4,
+                                                                                                               column=1)
 
     # user directory chooser
     def DatasetLoad(self):
         if self.DataSetPath is None:
-            self.DataSetPath = filedialog.askdirectory()
-
+            self.file_options1 = {}
+            self.file_options1['filetypes'] = [('all files', '.*'),('image files!', '*.png;*.jpg')]
+            self.file_options1['title'] = 'Data-set Directory:'
+            self.DataSetPath = filedialog.askdirectory(**self.file_options1)
 
     # function that load pre saved model
     def ModelLoad(self):
         if self.ModelPath is None:
-            self.ModelPath = filedialog.askdirectory()
+            file_options2 = {}
+            file_options2['filetypes'] = [('all files', '.h5')]
+            file_options2['title'] = 'Model Directory:'
+            self.ModelPath = filedialog.askdirectory(**file_options2)
 
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
         model = models.load_model(self.ModelPath)
         model_res = model.predict(self.DataSetPath, batch_size=20, verbose=0, steps=861, callbacks=None)
         plt_modle(model_res)
+
     # print(np.argmax(predictions[0]))
 
     # restart all the gui fields for new classification
@@ -61,6 +70,7 @@ class ModelGUI:
 
 # main program that initilized the GUI instane
 class main():
+    global model
     window = tk.Tk()
     window.geometry("550x200")
     GUI = ModelGUI(window)
