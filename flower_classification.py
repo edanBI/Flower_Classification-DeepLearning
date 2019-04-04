@@ -16,7 +16,9 @@ global model
 
 
 class ModelGUI:
-    global FilePath
+
+    global DataSetPath
+    global ModelPath
 
     def __init__(self,master):
 
@@ -24,29 +26,19 @@ class ModelGUI:
         self.master = master
         master.title("Welcome to the best image classification system!")
 
-        self.directions = Label(master,text="Select Dataset File to open:").grid(row=0,column=0)
-        FilePath = Entry(master).grid(row=0,column=1)
+        self.Header = Label(master, text="Let's Start!").grid(row=0,column=1)
 
-        self.browse_button = Button(master, text="Browse..",width=10,height=2,command=self.Browse,bg="blue").grid(row=0,column=2)
-        # self.browse_button.pack()
+        self.browse_button = Button(master, text="Browse..",width=10,height=2,command=self.Browse,bg="blue").grid(row=1,column=2)
+        self.directions = Label(master,text="Select Dataset File to open:").grid(row=1,column=0)
+        DataSetPath = Entry(master).grid(row=1,column=1)
 
-        self.predict_button = Button(master, text="Predict", width=10,height=2,command=self.Predict,bg="blue").grid(row=2,column=2)
-        # self.predict_button.pack()
+        self.browse_button = Button(master, text="Browse..",width=10,height=2,command=self.Browse,bg="blue").grid(row=2,column=2)
+        self.directions = Label(master,text="Select Model to load:").grid(row=2,column=0)
+        ModelPath = Entry(master).grid(row=2,column=1)
 
-        self.restart_button = Button(master, text="Restart",width=10,height=2,command=self.Restart,bg="blue").grid(row=3,column=0)
-        # self.restart_button.pack()
+        self.predict_button = Button(master, text="Predict", width=25,height=2,command=self.Predict,bg="blue").grid(row=3,column=1)
 
-        self.load_button = Button(master, text="Load network",width=10,height=2,command=self.NetworkLoad,bg="blue").grid(row=1,column=2)
-        # self.load_button.pack()
-
-        self.save_button = Button(master, text="Save network",width=10,height=2,command=self.Save,bg="blue").grid(row=3,column=2)
-        # self.save_button.pack()
-
-        OutPut = PanedWindow().grid(row=4)
-        # OutPut.pack(fill=BOTH,expand=1)
-        # test = Label(OutPut,text="testpane")
-        # OutPut.add(test)
-
+        self.restart_button = Button(master, text="Restart",width=25,height=2,command=self.Restart,bg="blue").grid(row=4,column=1)
 
 
     def Browse(self):
@@ -78,7 +70,7 @@ class ModelGUI:
 class main():
 
     window = Tk()
-    window.geometry("500x300")
+    window.geometry("550x200")
     GUI = ModelGUI(window)
     window.mainloop()
 
