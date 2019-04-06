@@ -1,11 +1,14 @@
 import keras
 # from keras import *
+import tensorflow as tf
 import tkinter as tk
 from tkinter import filedialog
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 from keras import layers
 from keras import models
 from keras import optimizers
@@ -58,21 +61,36 @@ class ModelGUI:
 
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
-        # if len(self.ModelPath) is 0 and len(self.DataSetPath) is 0:
-        #     self.DataSetPath = self.entry1.get()
-        #     self.ModelPath = self.entry2.get()
+        classifier_model = models.load_model(self.ModelPath.get())
 
-        # else:
-        #     model = models.load_model(self.ModelPath)
-        #     model_res = model.predict(self.DataSetPath, batch_size=20, verbose=0, steps=861, callbacks=None)
-        #     plt_modle(model_res)
+        classifier_model.compile(optimizer=optimizers.Adam(),loss=losses.sparse_categorical_crossentropy,metrics=['accuracy'])
+
+        image_generator = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True, shear_range=0.2, zoom_range=0.2,
+                                   width_shift_range=0.2, height_shift_range=0.2, fill_mode='nearest',
+                                   validation_split=0.2)
+        image_data = image_generator.flow_from_directory(self.DataSetPath.get(), target_size=(128, 128), batch_size=20,
+                                              class_mode='categorical', subset='validation')
+
+        #The resulting object is an iterator that returns image_batch, label_batch pairs.
+        # imagenet_labels = (["daisy", "dandelion", "rose", "sunflower", "tulip"])
+
+        imagenet_labels = sorted(image_data.class_indices.items(), key=lambda pair: pair[1])
+        imagenet_labels = np.array([key.title() for key, value in imagenet_labels])
+
+        for image_batch, label_batch in image_data:
+            result_batch = classifier_model.predict(image_batch)
+            labels_batch = imagenet_labels[np.argmax(result_batch, axis=-1)]
+            print(result_batch)
+            break
+
+        for n in range(len(image_data)):
+            plt.imshow(image_batch[n])
+            plt.title(labels_batch[n])
+            plt.axis('off')
+        _ = plt.suptitle("Model predictions")
 
         print(self.DataSetPath.get())
         print(self.ModelPath.get())
-        # print(self.DataEntry)
-        # print(self.ModelEntry)
-
-    # print(np.argmax(predictions[0]))
 
     # restart all the gui fields for new classification
     def Restart(self):
@@ -131,11 +149,12 @@ def TrainModel():
     v_steps = 861 / batch_size
     classes = 5
     flower_path = "/Users/eranedri/Documents/GitHub/Flower_Classification-DeepLearning/flowers"
-    catagories = ["daisy", "dandelion", "rose", "sunflower", "tulip"]
     train_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size,
                                           class_mode='categorical', subset='training')
     valid_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size,
                                           class_mode='categorical', subset='validation')
+
+
 
     model = models.Sequential()
     model.add(layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(img_size, img_size, 3)))
@@ -147,7 +166,41 @@ def TrainModel():
     optimizer = optimizers.Adam()
     loss = losses.categorical_crossentropy
     model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
-    model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs=1, validation_data=valid_gen,
-                                     validation_steps=v_steps)
+    model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs=10, validation_data=valid_gen,
+
+                                  validation_steps=v_steps)
+
+    # model = Sequential()
+    # model.add(Conv2D(32, (5, 5), input_shape=(X_train.shape[1], X_train.shape[2], 1), activation='relu'))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(Conv2D(32, (3, 3), activation='relu'))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(Dropout(0.2))
+    # model.add(Flatten())
+    # model.add(Dense(128, activation='relu'))
+    # model.add(Dense(number_of_classes, activation='softmax'))
+
+    # # MLP
+    # def mlp_mc_model():
+    #     model = Sequential()
+    #
+    #     model.add(Dense(128, activation='relu', input_shape=(128 * 128 * 3,)))
+    #     model.add(BatchNormalization())
+    #
+    #     model.add(Dense(256, activation='relu'))
+    #     model.add(BatchNormalization())
+    #
+    #     model.add(Dense(512, activation='relu'))
+    #     model.add(BatchNormalization())
+    #
+    #     model.add(Dense(1024, activation='relu'))
+    #     model.add(Dropout(0.2))
+    #     model.add(Dense(10, activation='softmax'))
+    #
+    #     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    #     return model
+
+
+
     model.save('flowers_model.h5')
     plt_modle(model_hist)
