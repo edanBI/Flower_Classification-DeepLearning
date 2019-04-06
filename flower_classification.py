@@ -13,6 +13,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 
+# this part for upload exist model and check his Prediction capabilities
 # system interface
 class ModelGUI:
 
@@ -41,18 +42,15 @@ class ModelGUI:
     # user directory chooser
     def DatasetLoad(self):
         if self.DataSetPath is None:
-            self.file_options1 = {}
-            self.file_options1['filetypes'] = [('all files', '.*'),('image files!', '*.png;*.jpg')]
-            self.file_options1['title'] = 'Data-set Directory:'
-            self.DataSetPath = filedialog.askdirectory(**self.file_options1)
+            self.DataSetPath = filedialog.askdirectory()
 
     # function that load pre saved model
     def ModelLoad(self):
         if self.ModelPath is None:
-            file_options2 = {}
-            file_options2['filetypes'] = [('all files', '.h5')]
-            file_options2['title'] = 'Model Directory:'
-            self.ModelPath = filedialog.askdirectory(**file_options2)
+            self.file_options = {}
+            self.file_options['filetypes'] = [('model files', '*.h5')]
+            self.file_options['title'] = 'Model Directory:'
+            self.ModelPath = filedialog.askopenfilename(**self.file_options)
 
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
@@ -77,6 +75,7 @@ class main():
     window.mainloop()
 
 
+# this part for self use to train our model
 # show results of the trained model
 def plt_modle(model_hist):
     acc = model_hist.history['acc']
