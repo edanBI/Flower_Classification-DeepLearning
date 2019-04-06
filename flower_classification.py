@@ -19,20 +19,20 @@ class ModelGUI:
 
     def __init__(self, master):
         self.master = master
-        self.DataSetPath = ""
-        self.ModelPath = ""
+        self.DataSetPath = tk.StringVar()
+        self.ModelPath = tk.StringVar()
         master.title("Welcome to the best image classification system!")
         self.Header = tk.Label(master, text="Let's Start!").grid(row=0, column=1)
 
         self.browse_button = tk.Button(master, text="Browse..", width=10, height=2, command=self.DatasetLoad).grid(
             row=1, column=2)
         self.directions = tk.Label(master, text="Select Dataset File to open:").grid(row=1, column=0)
-        self.DataSetPath = tk.Entry(master).grid(row=1, column=1)
+        self.entry1 = tk.Entry(master,textvariable=self.DataSetPath).grid(row=1, column=1)
 
         self.browse_button = tk.Button(master, text="Browse..", width=10, height=2, command=self.ModelLoad).grid(row=2,
                                                                                                                  column=2)
         self.directions = tk.Label(master, text="Select Model to load:").grid(row=2, column=0)
-        self.ModelPath = tk.Entry(master).grid(row=2, column=1)
+        self.entry2 = tk.Entry(master,textvariable=self.ModelPath).grid(row=2, column=1)
 
         self.predict_button = tk.Button(master, text="Predict", width=25, height=2, command=self.Predict).grid(row=3,
                                                                                                                column=1)
@@ -41,22 +41,36 @@ class ModelGUI:
 
     # user directory chooser
     def DatasetLoad(self):
-        if self.DataSetPath is None:
-            self.DataSetPath = filedialog.askdirectory()
+        self.Dtmp = filedialog.askdirectory()
+        self.DataSetPath.set(self.Dtmp)
 
     # function that load pre saved model
     def ModelLoad(self):
-        if self.ModelPath is None:
-            self.file_options = {}
-            self.file_options['filetypes'] = [('model files', '*.h5')]
-            self.file_options['title'] = 'Model Directory:'
-            self.ModelPath = filedialog.askopenfilename(**self.file_options)
+        self.file_options = {}
+        self.file_options['filetypes'] = [('model files', '*.h5')]
+        self.file_options['title'] = 'Model Directory:'
+        self.Mtmp = filedialog.askopenfilename(**self.file_options)
+        self.ModelPath.set(self.Mtmp)
 
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
-        model = models.load_model(self.ModelPath)
-        model_res = model.predict(self.DataSetPath, batch_size=20, verbose=0, steps=861, callbacks=None)
-        plt_modle(model_res)
+
+        # if len(self.ModelPath) is 0 and len(self.DataSetPath) is 0:
+        #     self.DataSetPath = self.entry1.get()
+        #     self.ModelPath = self.entry2.get()
+
+        # else:
+        #     model = models.load_model(self.ModelPath)
+        #     model_res = model.predict(self.DataSetPath, batch_size=20, verbose=0, steps=861, callbacks=None)
+        #     plt_modle(model_res)
+
+        print(self.DataSetPath.get())
+        print(self.ModelPath.get())
+        # print(self.DataEntry)
+        # print(self.ModelEntry)
+
+
+
 
     # print(np.argmax(predictions[0]))
 
