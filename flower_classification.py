@@ -1,16 +1,21 @@
 import keras
+# from keras import *
+import tkinter as tk
+from tkinter import filedialog
+from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 from keras import layers
 from keras import models
 from keras import optimizers
 from keras import losses
-from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
-import matplotlib
 
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
-import numpy as np
-import tkinter as tk
-from tkinter import filedialog
+
+# from tkinter import Entry
+# from tkinter import Tk
+# from tkinter import Button
+# from tkinter import END
 
 
 # this part for upload exist model and check his Prediction capabilities
@@ -23,17 +28,16 @@ class ModelGUI:
         self.ModelPath = tk.StringVar()
         master.title("Welcome to the best image classification system!")
         self.Header = tk.Label(master, text="Let's Start!").grid(row=0, column=1)
-
         self.browse_button = tk.Button(master, text="Browse..", width=10, height=2, command=self.DatasetLoad).grid(
             row=1, column=2)
         self.directions = tk.Label(master, text="Select Dataset File to open:").grid(row=1, column=0)
-        self.entry1 = tk.Entry(master,textvariable=self.DataSetPath).grid(row=1, column=1)
-
+        self.entry1 = tk.Entry(master, textvariable=self.DataSetPath)
+        self.entry1.grid(row=1, column=1)
         self.browse_button = tk.Button(master, text="Browse..", width=10, height=2, command=self.ModelLoad).grid(row=2,
                                                                                                                  column=2)
         self.directions = tk.Label(master, text="Select Model to load:").grid(row=2, column=0)
-        self.entry2 = tk.Entry(master,textvariable=self.ModelPath).grid(row=2, column=1)
-
+        self.entry2 = tk.Entry(master, textvariable=self.ModelPath)
+        self.entry2.grid(row=2, column=1)
         self.predict_button = tk.Button(master, text="Predict", width=25, height=2, command=self.Predict).grid(row=3,
                                                                                                                column=1)
         self.restart_button = tk.Button(master, text="Restart", width=25, height=2, command=self.Restart).grid(row=4,
@@ -54,7 +58,6 @@ class ModelGUI:
 
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
-
         # if len(self.ModelPath) is 0 and len(self.DataSetPath) is 0:
         #     self.DataSetPath = self.entry1.get()
         #     self.ModelPath = self.entry2.get()
@@ -69,15 +72,14 @@ class ModelGUI:
         # print(self.DataEntry)
         # print(self.ModelEntry)
 
-
-
-
     # print(np.argmax(predictions[0]))
 
     # restart all the gui fields for new classification
     def Restart(self):
-        self.DataSetPath.delete(0, 'end')
-        self.ModelPath.delete(0, 'end')
+        self.DataSetPath = tk.StringVar()
+        self.ModelPath = tk.StringVar()
+        self.entry1.delete(0, tk.END)
+        self.entry2.delete(0, tk.END)
 
 
 # main program that initilized the GUI instane
