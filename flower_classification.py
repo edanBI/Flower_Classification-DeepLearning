@@ -1,5 +1,6 @@
 import sys
-
+import os
+import cv2
 import keras
 # from keras import *
 import tensorflow as tf
@@ -59,55 +60,14 @@ class ModelGUI:
 
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
-        batch_size = 20
         img_size = 128
-        classes = 5
-        print(self.DataSetPath.get())
-        print(self.ModelPath.get())
+        batch_size = 20
+        CATEGORIES = ["daisy", "dandelion", "rose", "sunflower", "tulip"]
+
         self.classifier_model = models.load_model(self.ModelPath.get())
+        self.classifier_model.compile(optimizer=optimizers.Adam(), loss=losses.sparse_categorical_crossentropy,metrics=['accuracy'])
 
-        self.classifier_model.compile(optimizer=optimizers.Adam(), loss=losses.sparse_categorical_crossentropy,
-                                      metrics=['accuracy'])
-        print("model Successfully loaded!")
-        image_generator = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True, shear_range=0.2, zoom_range=0.2,
-                                             width_shift_range=0.2, height_shift_range=0.2, fill_mode='nearest')
-        self.image_data = image_generator.flow_from_directory(self.DataSetPath.get(), target_size=(img_size, img_size),
-                                                              batch_size=batch_size, classes=["daisy", "dandelion", "rose", "sunflower", "tulip"])
-        print("Data set Successfully loaded!")
-        # imgs , labels = next(self.image_data)
-        filenames = self.image_data.filenames
-        samples = len(filenames)
-        predictions = self.classifier_model.predict_generator(self.image_data,steps=np.ceil(samples/batch_size))
-        print(predictions)
 
-        y_true = np.array([0] * 1000 + [1] * 1000)
-        y_pred = predictions > 0.5
-
-        confusion_matrix(y_true, y_pred)
-        # print(self.image_data.class_indices)
-
-        # predicted_class_indices = np.argmax(predictions, axis=1)
-
-        # plt.matshow()
-        # # #The resulting object is an iterator that returns image_batch, label_batch pairs.
-        # # imagenet_labels = (["daisy", "dandelion", "rose", "sunflower", "tulip"])
-        #
-        # imagenet_labels = sorted(self.image_data.class_indices.items(), key=lambda pair: pair[1])
-        # imagenet_labels = np.array([key.title() for key, value in imagenet_labels])
-        #
-        # for image_batch, label_batch in self.image_data:
-        #     result_batch = self.classifier_model.predict(image_batch)
-        #     labels_batch = imagenet_labels[np.argmax(result_batch, axis=-1)]
-        #     print(result_batch)
-        #     break
-        #
-        # plt.figure(figsize=(15, 6));
-        # for n in range(10):
-        #     plt.imshow(image_batch[n])
-        #     plt.title(labels_batch[n])
-        #     plt.axis('off')
-        # _ = plt.suptitle("Model predictions")
-        #
 
 
     # restart all the gui fields for new classification
