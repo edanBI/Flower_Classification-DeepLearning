@@ -51,7 +51,7 @@ class ModelGUI:
         self.file_options['title'] = 'Model Directory:'
         self.Mtmp = filedialog.askopenfilename(**self.file_options)
         self.ModelPath.set(self.Mtmp)
-
+####
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
         img_size = 128
