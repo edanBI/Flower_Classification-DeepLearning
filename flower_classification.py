@@ -1,5 +1,9 @@
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
+import numpy as np
+import os
+import cv2
 import matplotlib
+
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from keras import layers
@@ -8,10 +12,6 @@ from keras import optimizers
 from keras import losses
 import tkinter as tk
 from tkinter import filedialog
-import cv2
-import numpy as np
-
-
 
 
 # this part for upload exist model and check his Prediction capabilities
@@ -51,41 +51,33 @@ class ModelGUI:
         self.file_options['title'] = 'Model Directory:'
         self.Mtmp = filedialog.askopenfilename(**self.file_options)
         self.ModelPath.set(self.Mtmp)
-####
+
+    ####
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
         img_size = 128
-        batch_size = 20
-        classes = {"daisy": 0, "dandelion": 1, "rose": 2, "sunflower": 3, "tulip": 4}
+        Categories = {"daisy": 0, "dandelion": 1, "rose": 2, "sunflower": 3, "tulip": 4}
+        train = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True, shear_range=0.2, zoom_range=0.2, width_shift_range=0.2, height_shift_range=0.2, fill_mode='nearest', validation_split=0.2)
+        test_gen = train.flow_from_directory(self.DataSetPath.get(), target_size=(img_size, img_size), batch_size=1, class_mode='categorical', subset='validation')
 
         self.classifier_model = models.load_model(self.ModelPath.get())
         self.classifier_model.compile(optimizer=optimizers.Adam(), loss=losses.sparse_categorical_crossentropy, metrics=['accuracy'])
 
-        # for image_path in os.listdir(self.DataSetPath.get()):
-        #     # create the full input path and read the file
-        #     input_path = os.path.join(path, image_path)
-        #     image_to_rotate = ndimage.imread(input_path)
-        #     test = self.classifier_model.predict_classes(test_gen)
-        #     print(test)
+        test_generator.reset()
+        pred = model.predict_generator(test_generator, verbose=1)
+
+        predicted_class_indices = np.argmax(pred, axis=1)
+
+        labels = (train_generator.class_indices)
+        labels = dict((v, k) for k, v in labels.items())
+        predictions = [labels[k] for k in predicted_class_indices]
+
+        filenames = test_generator.filenames
+        results = pd.DataFrame({"Filename": filenames,
+                                "Predictions": predictions})
+        results.to_csv("results.csv", index=False)
 
 
-        train = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True, shear_range=0.2, zoom_range=0.2, width_shift_range=0.2, height_shift_range=0.2, fill_mode='nearest', validation_split=0.2)
-        flower_path = self.DataSetPath.get()
-        test_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size, class_mode='categorical', subset='validation')
-        print(next(test_gen))
-        # tmp = test_gen.class_indices
-        # print(tmp)
-        # test = self.classifier_model.predict_classes(next(test_gen),batch_size=1)
-        # print(test)
-        #
-        # self.CSV_Out()
-
-        # predictions = self.classifier_model.predict_generator(self.test_gen)
-        # predictions = np.argmax(predictions, axis=-1)  # multiple categories
-        # label_map = (train_generator.class_indices)
-        # label_map = dict((v, k) for k, v in label_map.items())  # flip k,v
-        # predictions = [label_map[k] for k in predictions]
-        # print(predictions)
     # restart all the gui fields for new classification
     def Restart(self):
         self.DataSetPath = tk.StringVar()
@@ -146,12 +138,22 @@ def TrainModel():
     batch_size = 20
     t_steps = 3462 / batch_size
     v_steps = 861 / batch_size
-    # classes = {"daisy" : 0, "dandelion" : 1, "rose" : 2, "sunflower" : 3, "tulip" : 4}
     classes = 5
-
+    Categories = ["daisy", "dandelion", "rose", "sunflower", "tulip"]
     flower_path = "/Users/eranedri/Documents/GitHub/Flower_Classification-DeepLearning/flowers"
-    train_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size,class_mode='categorical', subset='training')
-    valid_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size,class_mode='categorical', subset='validation')
+
+    # for category in Categories:  # do dogs and cats
+    #     path = os.path.join(flower_path, category)  # create path to dogs and cats
+    #     for img in os.listdir(path):  # iterate over each image per dogs and cats
+    #         img_array = cv2.imread(os.path.join(path, img), cv2.IMREAD_GRAYSCALE)  # convert to array
+    #         plt.imshow(img_array, cmap='gray')  # graph it
+    #         plt.show()  # display!
+    #
+    #         break  # we just want one for now so break
+    #     break
+
+    train_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size, class_mode='categorical', subset='training' , color_mode="rgb")
+    valid_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size, class_mode='categorical', subset='validation' , color_mode="rgb")
 
     # option 1
     # model = models.Sequential()
@@ -188,7 +190,7 @@ def TrainModel():
     optimizer = optimizers.Adam()
     loss = losses.categorical_crossentropy
     model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
-    model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs=10, validation_data=valid_gen,validation_steps=v_steps)
+    model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs=8, validation_data=valid_gen, validation_steps=v_steps)
     model.save('flowers_model.h5')
     plt_modle(model_hist)
 
@@ -204,5 +206,3 @@ def main(*args):
 
 if __name__ == '__main__':
     main()
-
-
