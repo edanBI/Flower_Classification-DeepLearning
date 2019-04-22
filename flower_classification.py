@@ -1,22 +1,17 @@
-import sys
-import os
-import cv2
-import keras
-# from keras import *
-import tensorflow as tf
-import tkinter as tk
-from tkinter import filedialog
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-import numpy as np
-from PIL import Image
 from keras import layers
 from keras import models
 from keras import optimizers
 from keras import losses
-from sklearn.metrics import confusion_matrix
+import tkinter as tk
+from tkinter import filedialog
+import cv2
+import numpy as np
+
+
 
 
 # this part for upload exist model and check his Prediction capabilities
@@ -57,19 +52,40 @@ class ModelGUI:
         self.Mtmp = filedialog.askopenfilename(**self.file_options)
         self.ModelPath.set(self.Mtmp)
 
-
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
         img_size = 128
         batch_size = 20
-        CATEGORIES = ["daisy", "dandelion", "rose", "sunflower", "tulip"]
+        classes = {"daisy": 0, "dandelion": 1, "rose": 2, "sunflower": 3, "tulip": 4}
 
         self.classifier_model = models.load_model(self.ModelPath.get())
-        self.classifier_model.compile(optimizer=optimizers.Adam(), loss=losses.sparse_categorical_crossentropy,metrics=['accuracy'])
+        self.classifier_model.compile(optimizer=optimizers.Adam(), loss=losses.sparse_categorical_crossentropy, metrics=['accuracy'])
+
+        # for image_path in os.listdir(self.DataSetPath.get()):
+        #     # create the full input path and read the file
+        #     input_path = os.path.join(path, image_path)
+        #     image_to_rotate = ndimage.imread(input_path)
+        #     test = self.classifier_model.predict_classes(test_gen)
+        #     print(test)
 
 
+        train = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True, shear_range=0.2, zoom_range=0.2, width_shift_range=0.2, height_shift_range=0.2, fill_mode='nearest', validation_split=0.2)
+        flower_path = self.DataSetPath.get()
+        test_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size, class_mode='categorical', subset='validation')
+        print(next(test_gen))
+        # tmp = test_gen.class_indices
+        # print(tmp)
+        # test = self.classifier_model.predict_classes(next(test_gen),batch_size=1)
+        # print(test)
+        #
+        # self.CSV_Out()
 
-
+        # predictions = self.classifier_model.predict_generator(self.test_gen)
+        # predictions = np.argmax(predictions, axis=-1)  # multiple categories
+        # label_map = (train_generator.class_indices)
+        # label_map = dict((v, k) for k, v in label_map.items())  # flip k,v
+        # predictions = [label_map[k] for k in predictions]
+        # print(predictions)
     # restart all the gui fields for new classification
     def Restart(self):
         self.DataSetPath = tk.StringVar()
@@ -77,6 +93,20 @@ class ModelGUI:
         self.entry1.delete(0, tk.END)
         self.entry2.delete(0, tk.END)
         del self.classifier_model
+
+    def CSV_Out(self):
+        print("testoutttt")
+        #
+        # f = open('result.csv', 'w')
+        # for X Y in list(X_test):
+        #     if (clf.predict([X])[0]) >= 0.5:
+        #         f.write('1\n')
+        #         p = 1
+        #     else:
+        #         f.write('0\n')
+        #         p = 0
+        #     print(f"model predicts {p}")
+        # f.close()
 
 
 # this part for self use to train our model
@@ -111,18 +141,17 @@ def plt_modle(model_hist):
 
 # training new model on data set
 def TrainModel():
-    train = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True, shear_range=0.2, zoom_range=0.2,
-                               width_shift_range=0.2, height_shift_range=0.2, fill_mode='nearest', validation_split=0.2)
+    train = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True, shear_range=0.2, zoom_range=0.2, width_shift_range=0.2, height_shift_range=0.2, fill_mode='nearest', validation_split=0.2)
     img_size = 128
     batch_size = 20
     t_steps = 3462 / batch_size
     v_steps = 861 / batch_size
+    # classes = {"daisy" : 0, "dandelion" : 1, "rose" : 2, "sunflower" : 3, "tulip" : 4}
     classes = 5
+
     flower_path = "/Users/eranedri/Documents/GitHub/Flower_Classification-DeepLearning/flowers"
-    train_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size,
-                                          class_mode='categorical', subset='training')
-    valid_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size,
-                                          class_mode='categorical', subset='validation')
+    train_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size,class_mode='categorical', subset='training')
+    valid_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size,class_mode='categorical', subset='validation')
 
     # option 1
     # model = models.Sequential()
@@ -159,8 +188,7 @@ def TrainModel():
     optimizer = optimizers.Adam()
     loss = losses.categorical_crossentropy
     model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
-    model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs=10, validation_data=valid_gen,
-                                     validation_steps=v_steps)
+    model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs=10, validation_data=valid_gen,validation_steps=v_steps)
     model.save('flowers_model.h5')
     plt_modle(model_hist)
 
@@ -174,6 +202,7 @@ def main(*args):
     # TrainModel()
 
 
-if __name__ == '__main__': main(*sys.argv[1:])
+if __name__ == '__main__':
+    main()
 
-##erantesttt
+
