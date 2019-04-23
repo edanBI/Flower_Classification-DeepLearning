@@ -5,6 +5,7 @@ import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 import matplotlib
+
 matplotlib.use('TkAgg')  # MUST BE CALLED BEFORE IMPORTING plt
 import matplotlib.pyplot as plt
 from keras import layers
@@ -18,6 +19,8 @@ from keras.preprocessing import image
 import itertools
 import tkinter as tk
 from tkinter import filedialog
+import csv
+
 tf.logging.set_verbosity(tf.logging.ERROR)
 
 
@@ -59,22 +62,23 @@ class ModelGUI:
         self.Mtmp = filedialog.askopenfilename(**self.file_options)
         self.ModelPath.set(self.Mtmp)
 
-    def CSV_Out(predictions,images):
+    def CSV_Out(self, predictions, flowers):
         # Categories = ["daisy" =0, "dandelion" =1, "rose" = 2, "sunflower" = 3, "tulip" = 4]
 
-        f = open('result.csv', 'w')
-        for i in range(len(predictions)):
-            if (predictions[i] == 0):
-                f.write("{} {}\n".format(flowers[i],"daisy"))
-            if (predictions[i] == 1):
-                f.write("{} {}\n".format(flowers[i],"dandelion"))
-            if (predictions[i] == 2):
-                f.write("{} {}\n".format(flowers[i],"rose"))
-            if (predictions[i] == 3):
-                f.write("{} {}\n".format(flowers[i],"sunflower"))
-            if (predictions[i] == 4):
-                f.write("{} {}\n".format(flowers[i],"tulip"))
-        f.close()
+        with open('result.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+            for i in range(len(predictions)):
+                if (predictions[i] == 0):
+                    writer.writerow("{} {}\n".format(flowers[i], "daisy"))
+                if (predictions[i] == 1):
+                    writer.writerow("{} {}\n".format(flowers[i], "dandelion"))
+                if (predictions[i] == 2):
+                    writer.writerow("{} {}\n".format(flowers[i], "rose"))
+                if (predictions[i] == 3):
+                    writer.writerow("{} {}\n".format(flowers[i], "sunflower"))
+                if (predictions[i] == 4):
+                    writer.writerow("{} {}\n".format(flowers[i], "tulip"))
 
     ####
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
@@ -88,7 +92,7 @@ class ModelGUI:
 
         predictions = []
         flowers = []
-        result =
+
         for file in os.listdir(DATA):
             file = os.fsdecode(file)
             if file == '.DS_Store':
@@ -107,17 +111,16 @@ class ModelGUI:
         for i in range(len(predictions)):
             print("{} {}\n".format(flowers[i], predictions[i]))
 
-        CSV_Out(predictions,flowers)
-
+        CSV_Out(predictions, flowers)
 
         # restart all the gui fields for new classification
+
     def Restart(self):
         self.DataSetPath = tk.StringVar()
         self.ModelPath = tk.StringVar()
         self.entry1.delete(0, tk.END)
         self.entry2.delete(0, tk.END)
         del self.classifier_model
-
 
 
 # this part for self use to train our model
