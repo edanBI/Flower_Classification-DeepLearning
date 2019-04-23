@@ -1,17 +1,24 @@
-from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
-import numpy as np
+# from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 import os
 import cv2
+import tensorflow as tf
+from tensorflow import keras
+import numpy as np
 import matplotlib
-
-matplotlib.use('TkAgg')
+matplotlib.use('TkAgg') # MUST BE CALLED BEFORE IMPORTING plt
 import matplotlib.pyplot as plt
 from keras import layers
 from keras import models
 from keras import optimizers
 from keras import losses
+from keras import backend as K
+from keras.preprocessing.image import ImageDataGenerator
+# from sklearn.mterics import confusion_matrix
+import itertools
 import tkinter as tk
 from tkinter import filedialog
+tf.logging.set_verbosity(tf.logging.ERROR)
+
 
 
 # this part for upload exist model and check his Prediction capabilities
@@ -56,18 +63,19 @@ class ModelGUI:
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
         img_size = 128
-        Categories = {"daisy": 0, "dandelion": 1, "rose": 2, "sunflower": 3, "tulip": 4}
+        # Categories = {"daisy": 0, "dandelion": 1, "rose": 2, "sunflower": 3, "tulip": 4}
+        Categories = ["daisy", "dandelion", "rose", "sunflower", "tulip"]
         train = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True, shear_range=0.2, zoom_range=0.2, width_shift_range=0.2, height_shift_range=0.2, fill_mode='nearest', validation_split=0.2)
-        test_gen = train.flow_from_directory(self.DataSetPath.get(), target_size=(img_size, img_size), batch_size=1, class_mode='categorical', subset='validation')
+        test_gen = train.flow_from_directory(self.DataSetPath.get(), target_size=(img_size, img_size), batch_size=20,classes=Categories ,class_mode='categorical', subset='validation')
 
         self.classifier_model = models.load_model(self.ModelPath.get())
         self.classifier_model.compile(optimizer=optimizers.Adam(), loss=losses.sparse_categorical_crossentropy, metrics=['accuracy'])
 
-        test_generator.reset()
-        pred = model.predict_generator(test_generator, verbose=1)
-
+        # test_generator.reset()
+        pred = self.classifier_model.predict_generator(test_gen, steps=1,verbose=0)
+        print(pred)
         predicted_class_indices = np.argmax(pred, axis=1)
-
+        print(predicted_class_indices)
         labels = (train_generator.class_indices)
         labels = dict((v, k) for k, v in labels.items())
         predictions = [labels[k] for k in predicted_class_indices]
@@ -142,27 +150,8 @@ def TrainModel():
     Categories = ["daisy", "dandelion", "rose", "sunflower", "tulip"]
     flower_path = "/Users/eranedri/Documents/GitHub/Flower_Classification-DeepLearning/flowers"
 
-    # for category in Categories:  # do dogs and cats
-    #     path = os.path.join(flower_path, category)  # create path to dogs and cats
-    #     for img in os.listdir(path):  # iterate over each image per dogs and cats
-    #         img_array = cv2.imread(os.path.join(path, img), cv2.IMREAD_GRAYSCALE)  # convert to array
-    #         plt.imshow(img_array, cmap='gray')  # graph it
-    #         plt.show()  # display!
-    #
-    #         break  # we just want one for now so break
-    #     break
-
-    train_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size, class_mode='categorical', subset='training' , color_mode="rgb")
-    valid_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), batch_size=batch_size, class_mode='categorical', subset='validation' , color_mode="rgb")
-
-    # option 1
-    # model = models.Sequential()
-    # model.add(layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(img_size, img_size, 3)))
-    # model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-    # model.add(layers.Dropout(0.2))
-    # model.add(layers.Flatten())
-    # model.add(layers.Dense(classes, activation='relu'))
-    # model.add(layers.Dense(classes, activation='softmax'))
+    train_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), classes=Categories,batch_size=batch_size, class_mode='categorical', subset='training' , color_mode="rgb")
+    valid_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), classes=Categories,batch_size=batch_size, class_mode='categorical', subset='validation' , color_mode="rgb")
 
     # option 2
     model = models.Sequential()
@@ -174,18 +163,6 @@ def TrainModel():
     model.add(layers.Flatten())
     model.add(layers.Dense(img_size, activation='relu'))
     model.add(layers.Dense(classes, activation='softmax'))
-
-    # option 3
-    # model = models.Sequential()
-    # model.add(layers.Dense(128, activation='relu', input_shape=(img_size, img_size, 3)))
-    # model.add(layers.BatchNormalization())
-    # model.add(layers.Dense(256, activation='relu'))
-    # model.add(layers.BatchNormalization())
-    # model.add(layers.Dense(512, activation='relu'))
-    # model.add(layers.BatchNormalization())
-    # model.add(layers.Dense(1024, activation='relu'))
-    # model.add(layers.Dropout(0.2))
-    # model.add(layers.Dense(10, activation='softmax'))
 
     optimizer = optimizers.Adam()
     loss = losses.categorical_crossentropy
