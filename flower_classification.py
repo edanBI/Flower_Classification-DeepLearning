@@ -20,6 +20,8 @@ import itertools
 import tkinter as tk
 from tkinter import filedialog
 import csv
+from tkinter import scrolledtext
+
 
 tf.logging.set_verbosity(tf.logging.ERROR)
 
@@ -87,13 +89,6 @@ class ModelGUI:
             predictions.append(pred[0])
             flowers.append(file)
 
-        print(predictions)
-        print(flowers)
-
-
-        for i in range(len(predictions)):
-            print("{} {}\n".format(flowers[i], predictions[i]))
-
 
         with open('result.csv', 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -109,6 +104,33 @@ class ModelGUI:
                         writer.writerow([flowers[i], "sunflower"])
                     elif predictions[i] == 4:
                         writer.writerow([flowers[i], "tulip"])
+        ## for testing
+        # print(predictions)
+        # print(flowers)
+        # for i in range(len(predictions)):
+        #     print("{} {}\n".format(flowers[i], predictions[i]))
+
+        Res_window = tk.Tk()
+        Res_window.title("Classifcation Results!")
+        Res_window.geometry('520x200')
+        frame = tk.Frame(master=Res_window)
+        frame.pack(fill='both', expand='yes')
+        txt = scrolledtext.ScrolledText(frame,wrap=tk.WORD,width=70, height=20)
+        txt.grid(column=1, row=5)
+
+        for i in range(len(predictions)):
+            if predictions[i] == 0:
+                txt.insert(tk.INSERT,"{}  prediction -->  {}\n".format(flowers[i], "daisy") )
+            elif predictions[i] == 1:
+                txt.insert(tk.INSERT,"{}  prediction -->  {}\n".format(flowers[i], "dandelion") )
+            elif predictions[i] == 2:
+                txt.insert(tk.INSERT,"{}  prediction -->  {}\n".format(flowers[i], "rose") )
+            elif predictions[i] == 3:
+                txt.insert(tk.INSERT,"{}  prediction -->  {}\n".format(flowers[i], "sunflower") )
+            elif predictions[i] == 4:
+                txt.insert(tk.INSERT,"{}  prediction -->  {}\n".format(flowers[i], "tulip") )
+
+        Res_window.mainloop()
 
 
     def Restart(self):
