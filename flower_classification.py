@@ -62,24 +62,6 @@ class ModelGUI:
         self.Mtmp = filedialog.askopenfilename(**self.file_options)
         self.ModelPath.set(self.Mtmp)
 
-    def CSV_Out(self, predictions, flowers):
-        # Categories = ["daisy" =0, "dandelion" =1, "rose" = 2, "sunflower" = 3, "tulip" = 4]
-
-        with open('result.csv', 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-
-            for i in range(len(predictions)):
-                if (predictions[i] == 0):
-                    writer.writerow("{} {}\n".format(flowers[i], "daisy"))
-                if (predictions[i] == 1):
-                    writer.writerow("{} {}\n".format(flowers[i], "dandelion"))
-                if (predictions[i] == 2):
-                    writer.writerow("{} {}\n".format(flowers[i], "rose"))
-                if (predictions[i] == 3):
-                    writer.writerow("{} {}\n".format(flowers[i], "sunflower"))
-                if (predictions[i] == 4):
-                    writer.writerow("{} {}\n".format(flowers[i], "tulip"))
-
     ####
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
@@ -108,12 +90,26 @@ class ModelGUI:
         print(predictions)
         print(flowers)
 
+
         for i in range(len(predictions)):
             print("{} {}\n".format(flowers[i], predictions[i]))
 
-        CSV_Out(predictions, flowers)
 
-        # restart all the gui fields for new classification
+        with open('result.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+            for i in range(len(predictions)):
+                    if predictions[i] == 0:
+                        writer.writerow([flowers[i], "daisy"])
+                    elif predictions[i] == 1:
+                        writer.writerow([flowers[i], "dandelion"])
+                    elif predictions[i] == 2:
+                        writer.writerow([flowers[i], "rose"])
+                    elif predictions[i] == 3:
+                        writer.writerow([flowers[i], "sunflower"])
+                    elif predictions[i] == 4:
+                        writer.writerow([flowers[i], "tulip"])
+
 
     def Restart(self):
         self.DataSetPath = tk.StringVar()
@@ -167,7 +163,7 @@ def TrainModel():
     train_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), classes=Categories, batch_size=batch_size, class_mode='categorical', subset='training', color_mode="rgb")
     valid_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), classes=Categories, batch_size=batch_size, class_mode='categorical', subset='validation', color_mode="rgb")
 
-    # option 2
+    # option 1
     model = models.Sequential()
     model.add(layers.Conv2D(32, (5, 5), input_shape=(img_size, img_size, 3), activation='relu'))
     model.add(layers.MaxPooling2D(pool_size=(2, 2)))
@@ -178,30 +174,58 @@ def TrainModel():
     model.add(layers.Dense(img_size, activation='relu'))
     model.add(layers.Dense(classes, activation='softmax'))
 
-    # model = Sequential()
-    # model.add(Conv2D(32, (3, 3), input_shape=input_shape))
-    # model.add(Activation('relu'))
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
+    # option 2
+    # model = models.Sequential()
+    # model.add(layers.Conv2D(32, (3, 3), input_shape=(img_size, img_size, 3)))
+    # model.add(layers.Activation('relu'))
+    # model.add(layers.MaxPooling2D(pool_size=(2, 2)))
     #
-    # model.add(Conv2D(32, (3, 3)))
-    # model.add(Activation('relu'))
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(layers.Conv2D(32, (3, 3)))
+    # model.add(layers.Activation('relu'))
+    # model.add(layers.MaxPooling2D(pool_size=(2, 2)))
     #
-    # model.add(Conv2D(64, (3, 3)))
-    # model.add(Activation('relu'))
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(layers.Conv2D(64, (3, 3)))
+    # model.add(layers.Activation('relu'))
+    # model.add(layers.MaxPooling2D(pool_size=(2, 2)))
     #
-    # model.add(Flatten())
-    # model.add(Dense(64))
-    # model.add(Activation('relu'))
-    # model.add(Dropout(0.5))
-    # model.add(Dense(1))
-    # model.add(Activation('sigmoid'))
+    # model.add(layers.Flatten())
+    # model.add(layers.Dense(64))
+    # model.add(layers.Activation('relu'))
+    # model.add(layers.Dropout(0.5))
+    # model.add(layers.Dense(1))
+    # model.add(layers.Activation('softmax'))
+
+    # option 3
+    # model = models.Sequential()
+    # model.add(layers.Conv2D(filters=16, kernel_size=3, padding='same', activation='relu', input_shape=(img_size, img_size, 3)))
+    # model.add(layers.Conv2D(filters=16, kernel_size=3, padding='same', activation='relu'))
+    # model.add(layers.Conv2D(filters=16, kernel_size=3, padding='same', activation='relu'))
+    # model.add(layers.Dropout(0.3))
+    # model.add(layers.MaxPooling2D(pool_size=3))
+    #
+    # model.add(layers.Conv2D(filters=32, kernel_size=3, padding='same', activation='relu'))
+    # model.add(layers.Conv2D(filters=32, kernel_size=3, padding='same', activation='relu'))
+    # model.add(layers.Conv2D(filters=32, kernel_size=3, padding='same', activation='relu'))
+    # model.add(layers.Dropout(0.3))
+    # model.add(layers.MaxPooling2D(pool_size=3))
+    #
+    # model.add(layers.Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'))
+    # model.add(layers.Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'))
+    # model.add(layers.Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'))
+    # model.add(layers.Dropout(0.3))
+    # model.add(layers.MaxPooling2D(pool_size=3))
+    #
+    # model.add(layers.Conv2D(filters=128, kernel_size=3, padding='same', activation='elu'))
+    # model.add(layers.Conv2D(filters=128, kernel_size=3, padding='same', activation='elu'))
+    # model.add(layers.Conv2D(filters=256, kernel_size=3, padding='same', activation='elu'))
+    #
+    # model.add(layers.Flatten())
+    # model.add(layers.Dense(1, activation='softmax'))
 
     optimizer = optimizers.Adam()
     loss = losses.categorical_crossentropy
     model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
-    model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs=8, validation_data=valid_gen, validation_steps=v_steps)
+    model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs=10, validation_data=valid_gen, validation_steps=v_steps)
     model.save('flowers_model.h5')
     plt_modle(model_hist)
 
