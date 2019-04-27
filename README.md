@@ -3,7 +3,7 @@ Flower_Classification-DeepLearning
 
 Task2:
 
-302546056
-311252357
-312614175
-304846348
+Eran Edri - 302546056
+Inbar roth - 311252357
+Idan Weizman - 312614175
+Edan ben ivri - 304846348
