@@ -1,4 +1,5 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import cv2
 import random
 import tensorflow as tf
@@ -64,7 +65,7 @@ class ModelGUI:
         self.Mtmp = filedialog.askopenfilename(**self.file_options)
         self.ModelPath.set(self.Mtmp)
 
-    ####
+
     # first load te model from the modeldir and then classified the chosen dataset from the datasetdir and pop up new window with the results of the model
     def Predict(self):
         test_data = []
@@ -182,72 +183,46 @@ def TrainModel():
     Categories = ["daisy", "dandelion", "rose", "sunflower", "tulip"]
     flower_path = "/Users/eranedri/Documents/GitHub/Flower_Classification-DeepLearning/flowers"
 
-    train_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), classes=Categories, batch_size=batch_size, class_mode='categorical', subset='training', color_mode="rgb")
+    train_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), classes=Categories, batch_size=batch_size, class_mode='categorical' ,subset='training', color_mode="rgb")
     valid_gen = train.flow_from_directory(flower_path, target_size=(img_size, img_size), classes=Categories, batch_size=batch_size, class_mode='categorical', subset='validation', color_mode="rgb")
 
-    # option 1
+
+    #option 2
+    # model = models.Sequential()
+    # model.add(layers.Conv2D(32, (5, 5), input_shape=(img_size, img_size, 3), activation='relu'))
+    # model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+    #
+    # model.add(layers.Conv2D(32, (3, 3), activation='relu',data_format="channels_last"))
+    # model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+    #
+    # model.add(layers.Dropout(0.2))
+    # model.add(layers.Flatten())
+    #
+    # model.add(layers.Dense(img_size, activation='relu'))
+    # model.add(layers.Dense(classes, activation='softmax'))
+
     model = models.Sequential()
-    model.add(layers.Conv2D(32, (5, 5), input_shape=(img_size, img_size, 3), activation='relu'))
+    model.add(layers.Conv2D(32, (3, 3), input_shape=(img_size, img_size, 3), activation='relu',data_format="channels_last"))
     model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(layers.Conv2D(32, (3, 3), activation='relu'))
+    model.add(layers.Dropout(0.5))
+
+
+    model.add(layers.Conv2D(64, (3, 3), activation='relu',data_format="channels_last"))
     model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(layers.Dropout(0.2))
+    model.add(layers.Dropout(0.35))
+
+
+    model.add(layers.Conv2D(128, (3, 3), activation='relu',data_format="channels_last"))
+    model.add(layers.MaxPooling2D(pool_size=(2, 2)))
     model.add(layers.Flatten())
+    model.add(layers.Dropout(0.2))
     model.add(layers.Dense(img_size, activation='relu'))
     model.add(layers.Dense(classes, activation='softmax'))
-
-    # option 2
-    # model = models.Sequential()
-    # model.add(layers.Conv2D(32, (3, 3), input_shape=(img_size, img_size, 3)))
-    # model.add(layers.Activation('relu'))
-    # model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-    #
-    # model.add(layers.Conv2D(32, (3, 3)))
-    # model.add(layers.Activation('relu'))
-    # model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-    #
-    # model.add(layers.Conv2D(64, (3, 3)))
-    # model.add(layers.Activation('relu'))
-    # model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-    #
-    # model.add(layers.Flatten())
-    # model.add(layers.Dense(64))
-    # model.add(layers.Activation('relu'))
-    # model.add(layers.Dropout(0.5))
-    # model.add(layers.Dense(1))
-    # model.add(layers.Activation('softmax'))
-
-    # option 3
-    # model = models.Sequential()
-    # model.add(layers.Conv2D(filters=16, kernel_size=3, padding='same', activation='relu', input_shape=(img_size, img_size, 3)))
-    # model.add(layers.Conv2D(filters=16, kernel_size=3, padding='same', activation='relu'))
-    # model.add(layers.Conv2D(filters=16, kernel_size=3, padding='same', activation='relu'))
-    # model.add(layers.Dropout(0.3))
-    # model.add(layers.MaxPooling2D(pool_size=3))
-    #
-    # model.add(layers.Conv2D(filters=32, kernel_size=3, padding='same', activation='relu'))
-    # model.add(layers.Conv2D(filters=32, kernel_size=3, padding='same', activation='relu'))
-    # model.add(layers.Conv2D(filters=32, kernel_size=3, padding='same', activation='relu'))
-    # model.add(layers.Dropout(0.3))
-    # model.add(layers.MaxPooling2D(pool_size=3))
-    #
-    # model.add(layers.Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'))
-    # model.add(layers.Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'))
-    # model.add(layers.Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'))
-    # model.add(layers.Dropout(0.3))
-    # model.add(layers.MaxPooling2D(pool_size=3))
-    #
-    # model.add(layers.Conv2D(filters=128, kernel_size=3, padding='same', activation='elu'))
-    # model.add(layers.Conv2D(filters=128, kernel_size=3, padding='same', activation='elu'))
-    # model.add(layers.Conv2D(filters=256, kernel_size=3, padding='same', activation='elu'))
-    #
-    # model.add(layers.Flatten())
-    # model.add(layers.Dense(1, activation='softmax'))
 
     optimizer = optimizers.Adam()
     loss = losses.categorical_crossentropy
     model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
-    model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs=10, validation_data=valid_gen, validation_steps=v_steps)
+    model_hist = model.fit_generator(train_gen, steps_per_epoch=t_steps, epochs=50, validation_data=valid_gen, validation_steps=v_steps)
     model.save('flowers_model.h5')
     plt_modle(model_hist)
 
@@ -263,3 +238,4 @@ def main(*args):
 
 if __name__ == '__main__':
     main()
+
